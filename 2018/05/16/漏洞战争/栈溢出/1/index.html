@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="由于原版书中以最短的篇幅讲了这个漏洞，有很多地方过的很快可能不是很清楚，因此我自己在循序渐进过一遍 漏洞描述：Adobe reader中的CoolType.dll库解析SING表中uniqueName时存在栈溢出漏洞。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞">
+<meta property="og:url" content="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="由于原版书中以最短的篇幅讲了这个漏洞，有很多地方过的很快可能不是很清楚，因此我自己在循序渐进过一遍 漏洞描述：Adobe reader中的CoolType.dll库解析SING表中uniqueName时存在栈溢出漏洞。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-4.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-9.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-5.png">
+<meta property="og:updated_time" content="2019-04-07T17:07:59.694Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞">
+<meta name="twitter:description" content="由于原版书中以最短的篇幅讲了这个漏洞，有很多地方过的很快可能不是很清楚，因此我自己在循序渐进过一遍 漏洞描述：Adobe reader中的CoolType.dll库解析SING表中uniqueName时存在栈溢出漏洞。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-漏洞战争/栈溢出/1" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/16/漏洞战争/栈溢出/1/" class="article-date">
+  <time datetime="2018-05-16T15:03:13.000Z" itemprop="datePublished">2018-05-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a>►<a class="article-category-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>由于原版书中以最短的篇幅讲了这个漏洞，有很多地方过的很快可能不是很清楚，因此我自己在循序渐进过一遍</p>
+<p>漏洞描述：Adobe reader中的<strong>CoolType.dll</strong>库解析<strong>SING</strong>表中<strong>uniqueName</strong>时存在栈溢出漏洞。<br><a id="more"></a><br>思考漏洞分析思路：</p>
+<p>1、已经拿到<strong>poc.pdf样本文件</strong>，已知漏洞发生的位置是Cooltype.dll解析sing表unqiename字段时存在栈溢出漏洞，因此可以直接用IDA打开Cooltype.dll找到解析sing表的方式。（如果没有这个已知条件，不知道漏洞发生在Cooltype.dll中，应该怎么分析？希望有大神能跟我一起讨论）</p>
+<p>2、找到了9个包含SING字符串的函数，未确定漏洞函数是哪一个。在所有函数上下断点，运行程序，在运行到0803deaf继续运行后程序会退出CoolType领空，且此时esp和ebp为0c0c0a90和0c0c0b8c明显是被篡改了。因此初步判断0803deaf为漏洞函数（书上没有这一步）<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-1.png" alt="1-1"></p>
+<p>3、IDA反汇编0803deaf所在函数0803daef，可以看到非常容易出现问题的strcat函数。在0803dba1下断点，观察strcat前后的堆栈状况<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-2.png" alt="1-2"><br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-3.png" alt="1-3"><br>目的地址0012e504距离栈顶0012e494仅仅10H，strcat执行后栈空间被破坏<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-4.png" alt="1-4"></p>
+<p>4、接下来通过ttf格式，sing表格式找数据源，<a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-8.png" target="_blank" rel="noopener">ttf格式</a><br>参考<a href="https://docs.microsoft.com/en-us/typography/opentype/spec/font-file" target="_blank" rel="noopener">https://docs.microsoft.com/en-us/typography/opentype/spec/font-file</a><br>参考书中sing表的数据结构（sing表好像现在已经不再使用，没有在微软找到相应的表结构）<br>对比我们的object10<img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-9.png" alt="1-9"></p>
+<p>5、<img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/1-5.png" alt="1-5">从strcat参数可以知道源是eax+10，在动态调试时指向sing表偏移10的位置，即uniquename字段。</p>
+<p>6、可以得出结论，该漏洞形成原因是一个常见的缓冲区溢出漏洞，adobe reader调用strcat从sing表的uniquename字段复制数据到栈中时，未对uniqueName字段字符串长度进行检测。</p>
+<p>7、接下来分析漏洞的利用方式，在恶意构造的栈上下内存访问断点（0012e504-0012e744），跳过bib和msvcr80领空，来到0808b062（call [eax]）处,而此时eax为恶意构造的4a80cb38（rop指令）。这里控制EIP的方式特别难分析，待以后分析。</p>
+<p>8、4a80cb38（rop指令）-&gt;4a82a714(rop)-&gt;0c0c0c0c,0c0c0c0c中存放的依旧是rop指令用来绕过aslr和dep并且生成恶意文件执行恶意代码。</p>
+<p>其实这个漏洞的利用方式还是蛮难的、是书上第一个案例，给我这种萌新好强的挫败感啊。。。。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/1/" data-id="cju76c7v7000hn8hfeuj5ctcz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/06/11/漏洞战争/栈溢出/4/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          阿里旺旺ActiveX控件imageMan.dll栈溢出漏洞
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/05/16/漏洞战争/栈溢出/2/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CVE-2010-3333 Microsoft rtf栈溢出漏洞</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

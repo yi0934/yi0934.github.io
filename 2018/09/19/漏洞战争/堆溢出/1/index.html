@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>cve-2010-2553Microsoft Cinepak Codec CVDecompress函数堆溢出漏洞 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一、找到漏洞触发函数windbg附加wmplayer.exe后通过！gflag +hpa开启页堆。在wmplayer加载POC文件后，程序在rep movs停下，并通过栈回溯找到">
+<meta property="og:type" content="article">
+<meta property="og:title" content="cve-2010-2553Microsoft Cinepak Codec CVDecompress函数堆溢出漏洞">
+<meta property="og:url" content="http://yoursite.com/2018/09/19/漏洞战争/堆溢出/1/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="一、找到漏洞触发函数windbg附加wmplayer.exe后通过！gflag +hpa开启页堆。在wmplayer加载POC文件后，程序在rep movs停下，并通过栈回溯找到">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-04-07T17:12:24.189Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="cve-2010-2553Microsoft Cinepak Codec CVDecompress函数堆溢出漏洞">
+<meta name="twitter:description" content="一、找到漏洞触发函数windbg附加wmplayer.exe后通过！gflag +hpa开启页堆。在wmplayer加载POC文件后，程序在rep movs停下，并通过栈回溯找到">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-漏洞战争/堆溢出/1" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/09/19/漏洞战争/堆溢出/1/" class="article-date">
+  <time datetime="2018-09-19T15:23:27.000Z" itemprop="datePublished">2018-09-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a>►<a class="article-category-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      cve-2010-2553Microsoft Cinepak Codec CVDecompress函数堆溢出漏洞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>一、找到漏洞触发函数<br>windbg附加wmplayer.exe后通过！gflag +hpa开启页堆。在wmplayer加载POC文件后，程序在rep movs停下，并通过栈回溯找到<br><a id="more"></a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">0:012&gt; kb</span><br><span class="line">ChildEBP RetAddr  Args to Child              </span><br><span class="line">WARNING: Stack unwind information not available. Following frames may be wrong.</span><br><span class="line">02c9fd30 73b7cbf3 00000004 00000000 00000068 iccvid+0x22cc</span><br><span class="line">02c9fd60 73b766c8 001303b8 00000000 001200d8 iccvid!DllInstanceInit+0x6279</span><br><span class="line">*** ERROR: Symbol file could not be found.  Defaulted to export symbols for C:\WINDOWS\system32\MSVFW32.dll - </span><br><span class="line">02c9fdac 73b41938 001303b8 00000001 0000400d iccvid!DriverProc+0x1bf</span><br><span class="line">*** ERROR: Symbol file could not be found.  Defaulted to export symbols for C:\WINDOWS\system32\quartz.dll - </span><br><span class="line">02c9fdd0 7cf8fa9e 73b5b500 0000400d 02c9fde8 MSVFW32!ICSendMessage+0x2b</span><br><span class="line">02c9fe00 7cf8f9e9 73b5b500 00000000 001200d8 quartz+0x1fa9e</span><br></pre></td></tr></table></figure></p>
+<figure class="highlight plain"><figcaption><span>ub iccvid!DllInstanceInit+0x6279</span></figcaption><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">iccvid!DllInstanceInit+0x625e:</span><br><span class="line">73b7cbd8 ffb698000000    push    dword ptr [esi+98h]</span><br><span class="line">73b7cbde 57              push    edi</span><br><span class="line">73b7cbdf ff7528          push    dword ptr [ebp+28h]</span><br><span class="line">73b7cbe2 ff752c          push    dword ptr [ebp+2Ch]</span><br><span class="line">73b7cbe5 ff7530          push    dword ptr [ebp+30h]</span><br><span class="line">73b7cbe8 ff7514          push    dword ptr [ebp+14h]</span><br><span class="line">73b7cbeb ff765c          push    dword ptr [esi+5Ch]</span><br><span class="line">73b7cbee e8bb55ffff      call    iccvid+0x21ae (73b721ae)</span><br></pre></td></tr></table></figure>
+<p>触发漏洞的函数(iccvid+0x21ae (73b721ae))。</p>
+<p>二、分析漏洞触发原因<br>通过IDA分析该函数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">; 84:               qmemcpy(</span><br><span class="line">; 85:                 (void *)(*(_DWORD *)(v7 + 28) + v32),</span><br><span class="line">; 86:                 (const void *)(*(_DWORD *)(v7 + 28) + v32 - 0x2000),</span><br><span class="line">; 87:                 0x2000u);</span><br><span class="line">mov     ecx, [ebx+1Ch]</span><br><span class="line">lea     edi, [ecx+eax]</span><br><span class="line">mov     ecx, 800h</span><br><span class="line">lea     esi, [edi-2000h]</span><br><span class="line">rep movsd</span><br></pre></td></tr></table></figure>
+<p>反汇编，发现函数中调用了这个敏感函数，并且第三个参数为固定的0x2000。这里并无法判断问题所在，继续动态调试观察memcpy的源和目的数据，发现</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">0:008&gt; p</span><br><span class="line">eax=00000000 ebx=01f9ff20 ecx=00000000 edx=023bfd38 esi=01ce1b02 edi=00000000</span><br><span class="line">eip=73b722ac esp=023bfd04 ebp=023bfd30 iopl=0         nv up ei pl nz na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000206</span><br><span class="line">iccvid+0x22ac:</span><br><span class="line">73b722ac 3bc7            cmp     eax,edi</span><br><span class="line">0:008&gt; p</span><br><span class="line">eax=00000000 ebx=01f9ff20 ecx=00000000 edx=023bfd38 esi=01ce1b02 edi=00000000</span><br><span class="line">eip=73b722ae esp=023bfd04 ebp=023bfd30 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</span><br><span class="line">iccvid+0x22ae:</span><br><span class="line">73b722ae 7421            je      iccvid+0x22d1 (73b722d1)                [br=1]</span><br></pre></td></tr></table></figure>
+<p>由于该语句，跳转成功，导致跳过了漏洞函数的调用，但是漏洞触发是命中在跳转失败后的.text:73B722CC rep movsd指令中。可以推测该判断语句会不止命中1次，如图所示6-1，</p>
+<p>因此在73B722CC下断点，发现在第四次命中后，继续程序的话会触发异常，因此跟进第四次的运行情况，观察数据复制前的寄存器状态和堆的状态为</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">eax=00006000 ebx=0271ec68 ecx=00000800 edx=0acffd38 esi=0016e008 edi=00170008</span><br><span class="line">eip=73b722cc esp=0acffd04 ebp=0acffd30 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</span><br><span class="line">iccvid!CVDecompress+0x11e:</span><br><span class="line">73b722cc f3a5            rep movs dword ptr es:[edi],dword ptr [esi]</span><br></pre></td></tr></table></figure>
+<p>而且观察堆发现edi属于堆空间并且大小为0X6000h</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">0:016&gt; !heap -a</span><br><span class="line">Index   Address  Name      Debugging options enabled</span><br><span class="line">  1:   000a0000 </span><br><span class="line">    Segment at 000a0000 to 001a0000 (000e0000 bytes committed)</span><br><span class="line">    Segment at 026e0000 to 027e0000 (00003000 bytes committed)</span><br><span class="line">    Segment at 0aa60000 to 0ac60000 (000bf000 bytes committed)</span><br><span class="line">  2:   001a0000 </span><br><span class="line">    Segment at 001a0000 to 001b0000 (00006000 bytes committed)</span><br><span class="line">  3:   001b0000 </span><br><span class="line">    Segment at 001b0000 to 001c0000 (00003000 bytes committed)</span><br></pre></td></tr></table></figure>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">0016e680: 00060 . 000e0 [01] - busy (d8)</span><br><span class="line">0016e760: 000e0 . 00048 [01] - busy (3e)</span><br><span class="line">0016e7a8: 00048 . 00030 [01] - busy (28)</span><br><span class="line">0016e7d8: 00030 . 00060 [00]</span><br><span class="line">0016e838: 00060 . 06008 [01] - busy (6000)</span><br><span class="line">00174840: 06008 . 047c0 [10]</span><br><span class="line">00179000:      00011000      - uncommitted bytes.</span><br><span class="line">0018a000: 00000 . 00170 [01] - busy (164)</span><br><span class="line">0018a170: 00170 . 00170 [01] - busy (164)</span><br><span class="line">0018a2e0: 00170 . 00170 [01] - busy (164)</span><br><span class="line">0018a450: 00170 . 00170 [01] - busy (164)</span><br><span class="line">0018a5c0: 00170 . 00170 [01] - busy (164)</span><br></pre></td></tr></table></figure>
+<p>即0016e838-174838为申请的堆空间，而此次rep movs操作的复制的大小为2000h且目的地址为174840，因此此次操作导致了堆溢出覆盖了之后的堆结构</p>
+<p>三、接下来分析漏洞触发的整体流程流程以及poc的构建。</p>
+<p>首先需要程序调用73B721AE函数，且本地调用时的参数为（026dfea0，00f128f8，68，0005e800，0aa50050，540）,通过IDA反汇编73B721AE函数，并动态跟进73B721AE主要关注其中的判断语句。<br>第一个判断为<em>（a1+36）指向的数据值是否为0，如果不为0则调用localfree，应该是判断堆块是否被占用的。对构造poc来说无关紧要。<br><strong>第二个判断 if ( a3=68h &gt;= 0x20h )</strong><br><strong>第三个判断 直接观察反汇编指令为cmp [ebp+arg_8], eax。其中[ebp+arg_8]=a3=68h，eax=68h</strong><br>第四个判断sub_73B72186的返回值是否为0，跟进sub_73B72186函数可以看到无论怎么跳转都会执行xor eax,eax将eax重置为0，因此不影响POC的构造。<br>**第五个判断if ( v13=\</em>（a2+10-1）=0x10h &gt; 0 )<strong>
+</strong>第六个判断 if ( v29=0x5eh=[ebp+var_10] &lt; 0x16 )<strong>
+</strong>第七个判断 if ( v29=0x5eh &lt; v31=0x10h )<strong>
+</strong>第八个判断 if ( <em>v14=10h == 10h || </em>v14 == 11h )<strong><br>第九个判断 if ( sub_73B72186(v31, 12, &amp;a1) &lt; 0 )会将eax变为0，不影响
+</strong>第十个判断cmp eax，esi第一次两个值都为0，跳过了异常触发。而后三次会调用qmemcpy（）函数，eax值分别为2000，4000，6000，会将堆中的数据向后移动2000h<strong><br>第十一个判断*(a3+3)==0
+</strong>第十二个判断*v14=a2+10==11h,若相等则进入qmemcpy（）触发异常。<strong><br>几个敏感参数，68h、5eh、10h、11h对比POC，判断这些值在POC中的含义。<br>我觉得接下来是最难的，因为找不到完整的相关资料，也没办法弄清楚几个判断的含义，基本上只能猜。<br>从网站<br><a href="https://msdn.microsoft.com/en-us/library/ms779636(v=vs.85).aspx和https://multimedia.cx/mirror/cinepak.txt" target="_blank" rel="noopener">https://msdn.microsoft.com/en-us/library/ms779636(v=vs.85).aspx和https://multimedia.cx/mirror/cinepak.txt</a><br>并且用010editor来分析avi.poc文件<br><a href="http://www.sweetscape.com/010editor/repository/templates/" target="_blank" rel="noopener">http://www.sweetscape.com/010editor/repository/templates/</a><br>发现strf（stream format）中bmiheader-bicompression为cvid，图6-2（没有找到相关资料说明，Cinepak数据是从哪里开始的），根据poc.py得知cinepak_codec_data1对应010editor分析出来的struct genericblock gb[0]中的char data部分。分析Cinepak结构，查看各字段的值可以看到第二个判断以及第三个判断的</strong>0x68为CVID数据长度<strong>，第五个判断的</strong>10H为编码条数量<strong>，第六第七个判断的</strong>0x5E为未解压数据长度**，第八个判断的0x10为cvid chunkid，第十个判断的，第十二个判断的0x11为cvid chunkid。<br>而从第五个判断到第十二个判断为一个大循环，只要余下的判断满足，程序不break，程序便会一直运行，qmemcpy也会一直被调用，当调用超过3次后复制数据导致堆溢出。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">eax=00002000 ebx=0271ec68 ecx=00000800 edx=0acffd38 esi=0016a008 edi=0016c008</span><br><span class="line">eip=73b722cc esp=0acffd04 ebp=0acffd30 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</span><br><span class="line">iccvid!CVDecompress+0x11e:</span><br><span class="line">73b722cc f3a5            rep movs dword ptr es:[edi],dword ptr [esi]</span><br><span class="line">eax=00004000 ebx=0271ec68 ecx=00000800 edx=0acffd38 esi=0016c008 edi=0016e008</span><br><span class="line">eip=73b722cc esp=0acffd04 ebp=0acffd30 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</span><br><span class="line">iccvid!CVDecompress+0x11e:</span><br><span class="line">73b722cc f3a5            rep movs dword ptr es:[edi],dword ptr [esi]</span><br><span class="line">eax=00006000 ebx=0271ec68 ecx=00000800 edx=0acffd38 esi=0016e008 edi=00170008</span><br><span class="line">eip=73b722cc esp=0acffd04 ebp=0acffd30 iopl=0         nv up ei pl zr na pe nc</span><br><span class="line">cs=001b  ss=0023  ds=0023  es=0023  fs=003b  gs=0000             efl=00000246</span><br><span class="line">iccvid!CVDecompress+0x11e:</span><br><span class="line">73b722cc f3a5            rep movs dword ptr es:[edi],dword ptr [esi]</span><br></pre></td></tr></table></figure></p>
+<p>得出结论：将strf（stream format）中bmiheader-bicompression设置为cvid，使wmplay调用iccvid，cvid结构中设置CVID长度&gt;=0x20,编码条数量&gt;3则进入漏洞循环中。当chunk id为0X1100DE CVID CHUNK &gt;= 3,并且后面的数据超过0x16则会调用qmemcpy函数，且每次操作目的地址递增0x2000，而其大小总共只有0x6000，导致循环3次后导致堆溢出。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/09/19/漏洞战争/堆溢出/1/" data-id="cju76c7v6000fn8hfa8l74zkz" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/09/19/漏洞战争/堆溢出/2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/09/19/漏洞战争/栈溢出/5/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CVE-2012-0158 Microsoft Office MSCOMCTL.ocx栈溢出漏洞</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

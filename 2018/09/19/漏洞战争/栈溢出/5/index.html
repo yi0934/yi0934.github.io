@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>CVE-2012-0158 Microsoft Office MSCOMCTL.ocx栈溢出漏洞 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="漏洞描述：Windows通用控件MSCOMCTL.OCX存在栈溢出漏洞。 打开word，用windbg附加，运行poc文件后，程序中断。由于不知道程序出现问题的模块，查看esp附近的返回地址。这里先复习一下栈中函数调用的流程">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CVE-2012-0158 Microsoft Office MSCOMCTL.ocx栈溢出漏洞">
+<meta property="og:url" content="http://yoursite.com/2018/09/19/漏洞战争/栈溢出/5/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="漏洞描述：Windows通用控件MSCOMCTL.OCX存在栈溢出漏洞。 打开word，用windbg附加，运行poc文件后，程序中断。由于不知道程序出现问题的模块，查看esp附近的返回地址。这里先复习一下栈中函数调用的流程">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-04-07T17:08:12.958Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CVE-2012-0158 Microsoft Office MSCOMCTL.ocx栈溢出漏洞">
+<meta name="twitter:description" content="漏洞描述：Windows通用控件MSCOMCTL.OCX存在栈溢出漏洞。 打开word，用windbg附加，运行poc文件后，程序中断。由于不知道程序出现问题的模块，查看esp附近的返回地址。这里先复习一下栈中函数调用的流程">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-漏洞战争/栈溢出/5" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/09/19/漏洞战争/栈溢出/5/" class="article-date">
+  <time datetime="2018-09-19T14:00:15.000Z" itemprop="datePublished">2018-09-19</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a>►<a class="article-category-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CVE-2012-0158 Microsoft Office MSCOMCTL.ocx栈溢出漏洞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>漏洞描述：Windows通用控件MSCOMCTL.OCX存在栈溢出漏洞。</p>
+<p>打开word，用windbg附加，运行poc文件后，程序中断。由于不知道程序出现问题的模块，查看esp附近的返回地址。<br>这里先复习一下栈中函数调用的流程<br><a id="more"></a></p>
+<p>参数入栈，返回地址入栈，前ebp入栈，跳转到函数起始位置，申请扩大栈空间，执行函数，执行完后返回返回地址。<br>这就是说之前调用过的函数的返回地址可以通过查看esp之前的栈空间看到。</p>
+<p>0:000&gt; dps esp-0x50<br>00127adc  08d007dc<br>00127ae0  0cc306b0<br>00127ae4  00008282<br>00127ae8  00127b1c<br>00127aec  275c8a0a MSCOMCTL!DllGetClassObject+0x41cc6<br>00127af0  00127b14<br>00127af4  08d00e88<br>00127af8  00008282<br>00127afc  00000000<br>00127b00  08d007dc<br>00127b04  0cc306b0<br>00127b08  6a626f43<br>00127b0c  00000064<br>00127b10  00008282<br>00127b14  00000000<br>00127b18  00000000<br>00127b1c  00000000<br>00127b20  41414141<br>00127b24  00000000<br>00127b28  00000000<br>00127b2c  00000000<br>00127b30  00000000</p>
+<p>因此定位函数漏洞发生在MSCOMCTL模块，而且可以通过275c8a0a定位到漏洞函数的上级函数275C89C7。在MSCOMCTL.ocx模块中的275C89C7中下断点，可以看到漏洞触发的流程（sxe ld:MSCOMCTL.ocx，bp 275C89C7）。<br>动态调试程序，在第二次call    MSCOMCTL!DllGetClassObject+0x41a29 (275c876d)溢出，如图所示：<a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-1.png" target="_blank" rel="noopener">5-1</a></p>
+<p>观察275c876d函数，使用IDA反汇编发现该函数中存在敏感函数qmemcpy(void <em>dest, const void </em>src, size_t n);且size_t参数由上级函数的第三个参数传入为8282。如图<a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-2.png" target="_blank" rel="noopener">5-2</a></p>
+<p>观察该函数以及上级函数,并没有对该参数的大小进行检查,导致了这次溢出。<br>分析文档格式,发现shellcode位于\object\objocx{*\objdata<br>根据官方rtf格式描述如图<br><a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-5.png" target="_blank" rel="noopener">5-5</a></p>
+<p>并且通过<a href="https://github.com/decalage2/oletools" target="_blank" rel="noopener">https://github.com/decalage2/oletools</a> oletools来分析OLE数据.<br>rtfobj.py poc.doc -s all来从poc文档中提取出objole数据保存为poc.doc_object_000000A5.bin<br>olebrowse.py poc.doc_object_000000A5.bin分析可以看出来<br>clsid<br><a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-7.png" target="_blank" rel="noopener">5-7</a><br>data<br><a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-8.png" target="_blank" rel="noopener">5-8</a><br>此时mscomctl处理data中的数据时发生溢出,而进入漏洞触发点的流程如下图<a href="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/5-10.png" target="_blank" rel="noopener">5-10</a></p>
+<p>配合动态调试得知函数开始时分配了0X14大小的空间,<br>第一次调用sub_275C876D,使用了0xC的栈空间大小,将ebp-0x14位置赋值为0x6a626f43(Cobjd),返回值为0<br>之后<strong>比较[ebp-0x14]是否为6A626F43h</strong>(确定是Cobjd结构)后,<strong>比较 [ebp-0xc]是否大于8</strong>(漏洞产生原因,大于应该改成小于)<br>这里[ebp-0xc]为0x8282大于8,因此第二次调用sub_275C876D而[ebp-0xc]为次函数的第三个参数即复制长度,远远超过8导致溢出。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/09/19/漏洞战争/栈溢出/5/" data-id="cju76c7vc000mn8hftlq7ycij" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/09/19/漏洞战争/堆溢出/1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          cve-2010-2553Microsoft Cinepak Codec CVDecompress函数堆溢出漏洞
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/06/11/漏洞战争/栈溢出/4/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">阿里旺旺ActiveX控件imageMan.dll栈溢出漏洞</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

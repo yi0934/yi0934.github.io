@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>CVE-2010-3333 Microsoft rtf栈溢出漏洞 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="漏洞描述：office处理RTF格式的文档时，pFragments属性存在栈溢出。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CVE-2010-3333 Microsoft rtf栈溢出漏洞">
+<meta property="og:url" content="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/2/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="漏洞描述：office处理RTF格式的文档时，pFragments属性存在栈溢出。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-4.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-7ecx.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-6esi.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-5edi.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-9.png">
+<meta property="og:updated_time" content="2019-04-07T17:08:03.870Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CVE-2010-3333 Microsoft rtf栈溢出漏洞">
+<meta name="twitter:description" content="漏洞描述：office处理RTF格式的文档时，pFragments属性存在栈溢出。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-漏洞战争/栈溢出/2" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/16/漏洞战争/栈溢出/2/" class="article-date">
+  <time datetime="2018-05-16T15:03:13.000Z" itemprop="datePublished">2018-05-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a>►<a class="article-category-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CVE-2010-3333 Microsoft rtf栈溢出漏洞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>漏洞描述：office处理<strong>RTF格式</strong>的文档时，<strong>pFragments</strong>属性存在栈溢出。<br><a id="more"></a><br>思考漏洞分析思路：<br>由于已经拿到poc.ttf（debugging），就很好分析了。</p>
+<p>1、用word打开poc文件，在30e9eb88位置程序异常中断，观察异常原因。<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-1.png" alt="2-1"><br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-2.png" alt="2-2"><br>从图中可以看到，由于该操作将ESI中的数据拷贝到一个只读内存空间（130000）里导致程序异常，而且此时栈空间已经被破坏被恶意数据填充（12a200-13000）可以判断是栈溢出。</p>
+<p>2、由于此时栈空间已经被破坏，因此在30e9eb88下断点，观察栈溢出前的函数调用，并确定调用崩溃函数的函数<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-3.png" alt="2-3"><br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-4.png" alt="2-4"><br>3、在30f4cc5d下断点，观察调用崩溃函数前的执行流程，单步步过到30f4cc93  call [eax+1ch]（30e9e62）执行后程序崩溃</p>
+<p>4、观察rep movs时的几个关键参数</p>
+<p><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-7ecx.png" alt="ecx"></p>
+<p><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-6esi.png" alt="esi"></p>
+<p><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-5edi.png" alt="edi"></p>
+<p>发现edi距离ebp栈底只有10字节，而ecx等于322b，rep movs复制的数据远远超过了分配的栈空间，导致栈溢出。</p>
+<p>5、从poc文件中寻找导致漏洞触发的循环变量ecx（caac）<img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-10.png" alt="2-10"></p>
+<p>6、<a href="https://download.microsoft.com/download/2/f/5/2f599e18-07ee-4ec5-a1e7-f4e6a9423592/Word2007RTFSpec9.doc" target="_blank" rel="noopener">rtf格式规范</a><br>参考rtf格式规范，<img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/2-9.png" alt="2-9"><br>确定pFragement为一个数组，当处理该属性的第三个字段时，会把偏移八个字符后的4个字符当作数据大小，而没有对这四个字符进行检查</p>
+<p>exploit的利用，在看完<a href="https://bbs.pediy.com/thread-101217.htm" target="_blank" rel="noopener">exloit编写系列教程</a>补充。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/2/" data-id="cju76c7v5000en8hfhv1wvo9q" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/05/16/漏洞战争/栈溢出/1/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CVE-2010-2883 Adobe Reader TTF字体SING表栈溢出漏洞
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/05/16/漏洞战争/栈溢出/3/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">CVE-2011-0104 Microsoft Excel TOOLBARDEF Record栈溢出漏洞</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

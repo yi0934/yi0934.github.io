@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>CVE-2011-0104 Microsoft Excel TOOLBARDEF Record栈溢出漏洞 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="漏洞描述：office处理XLB的文档时，TOOLBARDEF Record属性存在栈溢出。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CVE-2011-0104 Microsoft Excel TOOLBARDEF Record栈溢出漏洞">
+<meta property="og:url" content="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/3/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="漏洞描述：office处理XLB的文档时，TOOLBARDEF Record属性存在栈溢出。">
+<meta property="og:locale" content="default">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-2.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-3.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-4.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-5.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-6.png">
+<meta property="og:updated_time" content="2019-04-07T17:08:19.612Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CVE-2011-0104 Microsoft Excel TOOLBARDEF Record栈溢出漏洞">
+<meta name="twitter:description" content="漏洞描述：office处理XLB的文档时，TOOLBARDEF Record属性存在栈溢出。">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-1.png">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-漏洞战争/栈溢出/3" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2018/05/16/漏洞战争/栈溢出/3/" class="article-date">
+  <time datetime="2018-05-16T15:03:13.000Z" itemprop="datePublished">2018-05-16</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a>►<a class="article-category-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CVE-2011-0104 Microsoft Excel TOOLBARDEF Record栈溢出漏洞
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>漏洞描述：office处理<strong>XLB</strong>的文档时，<strong>TOOLBARDEF Record</strong>属性存在栈溢出。<br><a id="more"></a><br>1、已经拿到<strong>exploit.xlb样本文件</strong>，windbg打开excel，并加载exploit.xlb,程序中断。<br>在该指令下断点，查看栈被覆盖前的情况，可以发现栈空间已经被恶意数据覆盖，这次使用污点追踪的方法分析。<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-1.png" alt="3-1"></p>
+<p>2、通过IDA打开找到300ce361所在函数为300ce252。由于程序执行到300ce361时，栈空间会被恶意数据覆盖，因此在程序执行到300ce252时，通过ollydbg在栈顶下内存写入断点。<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-2.png" alt="3-2"></p>
+<p>3、F9执行后会遇到部分PUSH指定，这里我们只关注栈空间被大量数据覆盖的指令，因此可以无视PUSH，程序执行到300ce3c8时断下，并查看此时的edi指向栈空间，esi指向大量畸形数据，ecx为AB。<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-3.png" alt="3-3"></p>
+<p>4、可以猜测可能是这次rep movs指令导致了栈溢出，因此可以关注rep movs指令控制复制数据大小的ecx是否正常。用IDA定位到300ce3c8所在函数，查看ecx来源。</p>
+<p><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-4.png" alt="3-4"></p>
+<p>5、根据alt+k看到的栈调用情况，可以看出流程</p>
+<p><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-5.png" alt="3-5"></p>
+<p>call 300ce252(arg1,arg2,…,arg11)<br>call 306deefe()<br>call 300ce380(0013d8c7,300,ffffefe1)<br>找到了漏洞触发点后，去调查到底是excel在处理那些数据时导致了溢出漏洞。</p>
+<p>6、可以利用现成的office格式分析工具py-office-tools（<a href="https://github.com/ohio813/py-office-tools）来解析poc文件。" target="_blank" rel="noopener">https://github.com/ohio813/py-office-tools）来解析poc文件。</a></p>
+<p>7、并与exploit.py中的敏感字段比较，如下图所示：<br><img src="https://raw.githubusercontent.com/yi0934/yi0934.github.io/master/image/3-6.png" alt="3-6"></p>
+<p>8、得出结论excel在处理xlb文档时，当recordtype =toolbardef（0Xa7），fUnnamed=（0Xb0）， cbtn=（0Xcf）时，没有对continue数据段的长度（300）进行检查。（详细的处理流程需要通过IDA与OD动静结合来进行分析）</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2018/05/16/漏洞战争/栈溢出/3/" data-id="cju76c7v9000jn8hf9u35fm4r" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2018/05/16/漏洞战争/栈溢出/2/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          CVE-2010-3333 Microsoft rtf栈溢出漏洞
+        
+      </div>
+    </a>
+  
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>

@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="generator" content="Hexo 3.8.0">
+  <meta charset="utf-8">
+  
+
+  
+  <title>ms17-010漏洞分析 | Hexo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="分析ms17-010的文章很多，但都是点到为止，并没有深入分析，网上能找到最详细的分析文章我认为是国外的安全研究员写的https://github.com/worawit/MS17-010/blob/master/BUG.txt 国内研究员翻译该文章写的非常详细，但是是英文很多地方比较难理解，这里写下自己理解到的漏洞利用原理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ms17-010漏洞分析">
+<meta property="og:url" content="http://yoursite.com/2019/04/08/CVE漏洞分析/ms17-010/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="分析ms17-010的文章很多，但都是点到为止，并没有深入分析，网上能找到最详细的分析文章我认为是国外的安全研究员写的https://github.com/worawit/MS17-010/blob/master/BUG.txt 国内研究员翻译该文章写的非常详细，但是是英文很多地方比较难理解，这里写下自己理解到的漏洞利用原理。">
+<meta property="og:locale" content="default">
+<meta property="og:updated_time" content="2019-04-07T17:07:02.758Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ms17-010漏洞分析">
+<meta name="twitter:description" content="分析ms17-010的文章很多，但都是点到为止，并没有深入分析，网上能找到最详细的分析文章我认为是国外的安全研究员写的https://github.com/worawit/MS17-010/blob/master/BUG.txt 国内研究员翻译该文章写的非常详细，但是是英文很多地方比较难理解，这里写下自己理解到的漏洞利用原理。">
+  
+    <link rel="alternate" href="/atom.xml" title="Hexo" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+</html>
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Hexo</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+          <a class="main-nav-link" href="/categories">Categories</a>
+        
+          <a class="main-nav-link" href="/about">About</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://yoursite.com"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-CVE漏洞分析/ms17-010" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2019/04/08/CVE漏洞分析/ms17-010/" class="article-date">
+  <time datetime="2019-04-07T16:13:21.000Z" itemprop="datePublished">2019-04-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      ms17-010漏洞分析
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>分析ms17-010的文章很多，但都是点到为止，并没有深入分析，网上能找到最详细的分析文章我认为是国外的安全研究员写的<a href="https://github.com/worawit/MS17-010/blob/master/BUG.txt" target="_blank" rel="noopener">https://github.com/worawit/MS17-010/blob/master/BUG.txt
+</a><br><a href="http://www.freebuf.com/articles/system/139481.html" target="_blank" rel="noopener">国内研究员翻译</a><br>该文章写的非常详细，但是是英文很多地方比较难理解，这里写下自己理解到的漏洞利用原理。<br><a id="more"></a></p>
+<p>一、理解文章[<a href="https://github.com/worawit/MS17-010/blob/master/BUG.txt" target="_blank" rel="noopener">https://github.com/worawit/MS17-010/blob/master/BUG.txt</a><br>首先我们要了解漏洞相关的SMB transaction协议，通过微软官方文档<a href="https://msdn.microsoft.com/en-us/library/ee441702.aspx" target="_blank" rel="noopener">https://msdn.microsoft.com/en-us/library/ee441702.aspx</a><br>SMB消息由SMB_header，SMB_Parameters,SMB_Data组成，SMB共75种命令，与transaction子命令相关的有6种<br>SMB_COM_TRANSACTION（命令码为0x25）<br>SMB_COM_TRANSACTION_SECONDARY（命令码为0x26）<br>SMB_COM_TRANSACTION2（命令码为0x32）<br>SMB_COM_TRANSACTION2_SECONDARY（命令码为0x33）<br>SMB_COM_NT_TRANSACT（命令码为0xA0）<br>SMB_COM_NT_TRANSACT_SECONDARY（命令码为0xA1）</p>
+<p>当transaction消息比SMB消息大（通过会话中的maxbuffersize参数判断）时，那么客户端必须使用1个或多个的SMB_COM_<em>TRANSACT</em>_SECONDARY命令跟在SMB_COM_<em>TRANSACT</em>之后（这些命令和transaction消息使用相同的TID,UID,PID,MID）去发给transaction消息。</p>
+<p>SMB_Header主要定义了各种标志码</p>
+<pre><code>SMB_Header
+{
+UCHAR  Protocol[4];
+UCHAR  Command;  //命令码
+SMB_ERROR Status;//错误信息
+UCHAR  Flags;    //
+USHORT Flags2;
+USHORT PIDHigh;  
+UCHAR  SecurityFeatures[8];
+USHORT Reserved;
+USHORT TID;   //tree id
+USHORT PIDLow;/进程ID
+USHORT UID;  //用户ID
+USHORT MID;  //multiplex ID
+}
+</code></pre><p>SMB_Parameters主要定义了各种传递的参数，不同命令smb_parameters结构不一样当命令码为0x25即SMB_COM_TRANSACTION命令对应的smb_parameters如下</p>
+<pre><code>SMB_Parameters
+{
+   UCHAR  WordCount;
+   Words
+   {
+ USHORT TotalParameterCount;
+ USHORT TotalDataCount;
+ USHORT MaxParameterCount;
+ USHORT MaxDataCount;
+ UCHAR  MaxSetupCount;
+ UCHAR  Reserved1;
+ USHORT Flags;
+ ULONG  Timeout;
+ USHORT Reserved2;
+ USHORT ParameterCount;
+ USHORT ParameterOffset;
+ USHORT DataCount;
+ USHORT DataOffset;
+ UCHAR  SetupCount;
+ UCHAR  Reserved3;
+ USHORT Setup[SetupCount];  //3种Transaction子命令的该字段略有不同
+   }
+}
+</code></pre><p>SMB_Data主要包含了用于服务端操作的参数和数据</p>
+<pre><code>SMB_Data
+{
+   USHORT ByteCount;
+   Bytes
+   {
+ SMB_STRING Name;
+ UCHAR  Pad1[];
+ UCHAR  Trans_Parameters[ParameterCount];
+ UCHAR  Pad2[];
+ UCHAR  Trans_Data[DataCount];
+   }
+}
+</code></pre><p>SMB中用来处理命令码为transaction的数据包时，会在分页池缓冲区申请内存用来存放接收/发送的数据。<br>经过等数据包的处理后，内存中TRANSACTION结构分布如下</p>
+<pre><code>| TRANSACTION | transaction data buffer |
+</code></pre><p>transaction数据缓存总是跟在transaction结构之后，而transaction结构体中重要的成员如下：</p>
+<pre><code>  - InSetup : 指向transaction缓冲区中的接收setup指针
+  - OutSetup : 指向transaction缓冲区中的回应setup指针 (在所有transaction数据接收完但是还不在transaction缓冲区时设置)
+  - InParameters : 指向transaction缓冲区接收参数的指针
+  - OutParameters : 指向transaction缓冲区回应参数的指针
+  - InData : 指向transaction缓冲区接收数据的指针
+  - OutData : 指向transaction缓冲区回应数据的指针
+  - SetupCount : transaction 请求中的setup元素个数（这决定InSetup buffer的大小）
+  - MaxSetupCount : transaction 回应中的setup元素最大字节（这决定outsetup buffer的大小）
+  - ParameterCount : 目前接收参数的字节或回应参数的个数
+  - TotalParameterCount : transaction请求中发生送的参数字节总数(这决定InParameters buffer的大小)
+  - MaxParameterCount : transaction回应中客户端能接收的最大参数字节总数（这决定OutParameters buffer大小）
+  - DataCount : 当前接收到的数据字节数或要发送的回应数据的字节数
+  - TotalDataCount : 在这个transaction请求中发送的数据字节总数
+(这决定InData buffer大小)
+  - MaxDataCount : 客户端在transaction回复中接受的最大数据字节数。 这个决定了数据缓冲区的大小。(这决定OutData buffer大小)
+  - Function : NT transaction子命令码.
+  - Tid : The transaction Tid.
+  - Pid : The transaction Pid.
+  - Uid : The transaction Uid.
+  - Mid/Fid : The transaction Mid.
+- AllDataReceived : 当ParameterCount == TotalParamterCount &amp;&amp; DataCount == TotalDataCount时，布尔值为1 .
+</code></pre><p>而transaction数据缓存区布局如下：</p>
+<p>第一种：除TRANS_MAILSLOT_WRITE和SetupCount字段置为0的”TRANS“数据包外，其它SMB_COM_TRANSACTION数据包，IN<em>和OUT</em>缓冲区是重叠的（InSetup指针和OutParameters指针指向同一内存地址）</p>
+<pre><code>+---------------+------------------------------------------------------+
+|  TRANSACTION  | transaction data buffer  |
++---------------+------------------------------------------------------+
+| InSetup |   InParameters   |  InData   | |
++------------------------------------------------------+
+|  OutParameters  |OutData |
++------------------------------------------------------+
+</code></pre><p>第二种：除第一种情况外的其它SMB_COM_TRANSACTION数据包和所有SMB_COM_TRANSACTION2数据包的内存布局如下所述，所有缓冲区都不重叠。</p>
+<pre><code>+---------------+-------------------------------------------------------------------+
+|  TRANSACTION  |  transaction data buffer  |
++---------------+-------------------------------------------------------------------+
+| InSetup | InParameters |   InData   |  OutParameters  |  OutData  |
++-------------------------------------------------------------------+
+</code></pre><p>第三种：SMB_COM_NT_TRANS数据包的内存布局如下所述，InParameters和OutParameters之间、InData和OutData之间的缓冲区都是重叠的。</p>
+<pre><code>+---------------+-----------------------------------------------------------+
+|  TRANSACTION  |   transaction data buffer |
++---------------+-----------------------------------------------------------+
+| InSetup |  InParameters| InData  ||
++---------+----------------------+--------------------------+
+|         |  OutParameters|OutData  |
++-----------------------------------------------------------+
+</code></pre><p>大概了解了transaction协议后，作者通过补丁对比发现了9个bug，我们来分析在NSA泄露工具中被用到bug。</p>
+<p>===========</p>
+<h1 id="Bug1-Uninitialized-transaction-InParameters-and-InData-buffer"><a href="#Bug1-Uninitialized-transaction-InParameters-and-InData-buffer" class="headerlink" title="Bug1: Uninitialized transaction InParameters and InData buffer"></a>Bug1: Uninitialized transaction InParameters and InData buffer</h1><p>没有被用到</p>
+<p>===============</p>
+<h1 id="Bug2-TRANS-PEEK-NMPIPE-transaction-subcommand-expects-MaxParameterCount-to-be-16"><a href="#Bug2-TRANS-PEEK-NMPIPE-transaction-subcommand-expects-MaxParameterCount-to-be-16" class="headerlink" title="Bug2: TRANS_PEEK_NMPIPE transaction subcommand expects MaxParameterCount to be 16"></a>Bug2: TRANS_PEEK_NMPIPE transaction subcommand expects MaxParameterCount to be 16</h1><p>SrvPeekNamedPipe()用来处理TRANS_PEEK_NMPIPE subcommand子命令，它会将命名管道数据trans_data存在OutParameters缓冲区中，具体位于OutParameters+16的内存位置。如果MaxParameterCount参数是16，Outdata会指向正确的管道数据，但是如果恶意修改数据包中的MaxParameterCount使其大于16。由于OutParameter和OutData相邻，outdata 指针原本指向outparameters+MaxParameterCount（16）即outdata，而如果将MaxParameterCount（16）修改为大于outdata的长度，就可以读取到outdata以外的数据。</p>
+<p>这个漏洞并没有在NSA泄露工具中被用到，但是可以用来检测客户端是否已经打了MS17-010补丁。<br>我们可以构造一个TRANS_PEEK_NMPIPE命令请求数据包，当数据包中的参数MaxParameterCount、MaxDataCount满足二者之和大于0x1040且MaxDataCount+16小于0×10400，在没有安装ms17-010补丁时会返回0xC0000205错误码，而如果漏洞已经修复则返回的错误码就不是0xc0000205,而是由Insetup决定。可以通过相应数据包是否返回0xc0000205错误码来判断补丁是否被修补（可以在checker.py中看到利用该BUG检测补丁安装情况）</p>
+<p>===============</p>
+<h1 id="Bug6-Transaction-secondary-can-be-used-with-any-transaction-type"><a href="#Bug6-Transaction-secondary-can-be-used-with-any-transaction-type" class="headerlink" title="Bug6: Transaction secondary can be used with any transaction type"></a>Bug6: Transaction secondary can be used with any transaction type</h1><p>由于服务端通过secondary数据包判断transaction命令类型，之后决定使用哪种函数来处理transaction数据</p>
+<p>===============</p>
+<h1 id="Bug7-Wrong-type-assigment-in-SrvOs2FeaListSizeToNt"><a href="#Bug7-Wrong-type-assigment-in-SrvOs2FeaListSizeToNt" class="headerlink" title="Bug7: Wrong type assigment in SrvOs2FeaListSizeToNt()"></a>Bug7: Wrong type assigment in SrvOs2FeaListSizeToNt()</h1><p>SrvOs2FeaListSizeToNt()函数处理客户端的SMB_COM_TRANSACTION2请求时，会将其FEA_LIST转换为FILE_FULL_EA_INFORMATION数据结构并为其分配缓冲区。FILE_FULL_EA_INFORMATION结构中计算缓冲区长度时，计算出来的缓冲区长度值为word类型（最大0x0000FFFF），因此在mov操作时寄存器eax高位不变，而原本eax高位为1最后导致计算出来的缓冲区长度为(0x0001FFFF)远远超过FFFF导致缓冲区溢出</p>
+<pre><code>(word)feasize end=(word)feaend-(word)feastart
+feaend esi=a4217035=v3
+feastart eax=a42070d8=v1
+
+sub esi,eax        此操作后esi=FF5D
+mov word ptr [eax],si     [eax]原本值为(0x00010000)此操作后[eax]=0x0001FF5D而有效的[eax]应该为0x0000FF5D
+</code></pre><p>此漏洞发生在SrvOs2FeaListSizeToNt()函数处理客户端的SMB_COM_TRANSACTION2请求时，但SMB_COM_TRANSACTION2命令中totaldatacount字段类型为ushort（最大为0XFFFF），这造成从客户端接收到的transaction数据被分配到缓冲区时造成缓冲区溢出<br>但是SMB_COM_TRANSACTION2命令能发送的最大transaction数据为0xFFFF(totaldatacount字段为USHORT)</p>
+<p>===============</p>
+<h1 id="Bug9-SESSION-SETUP-AND-X-request-format-confusion"><a href="#Bug9-SESSION-SETUP-AND-X-request-format-confusion" class="headerlink" title="Bug9: SESSION_SETUP_AND_X request format confusion"></a>Bug9: SESSION_SETUP_AND_X request format confusion</h1><p>SMB_COM_SESSION_SETUP_ANDX请求有两个格式，两种格式中的wordcount字段是不同的，<br>而负责处理SMB_COM_SESSION_SETUP_ANDX请求的BlockingSessionSetupAndX()函数伪代码如下:<br>    BlockingSessionSetupAndX()<br>    {<br>    // …</p>
+<pre><code>// check word count
+if (! (request-&gt;WordCount == 13 || (request-&gt;WordCount == 12 &amp;&amp; (request-&gt;Capablilities &amp; CAP_EXTENDED_SECURITY))) ) {
+    // error and return
+}
+
+// ...
+
+if ((request-&gt;Capablilities &amp; CAP_EXTENDED_SECURITY) &amp;&amp; (smbHeader-&gt;Flags2 &amp; FLAGS2_EXTENDED_SECURITY)) {
+    // this request is Extend Security request
+    GetExtendSecurityParameters();  // extract parameters and data to variables
+    SrvValidateSecurityBuffer();  // do authentication
+}
+else {
+    // this request is NT Security request
+    GetNtSecurityParameters();  // extract parameters and data to variables
+    SrvValidateUser();  // do authentication
+}
+
+// ...
+}
+</code></pre><p>如果发送Extended Security的SMB_COM_SESSION_SETUP_ANDX请求（WordCount为12）。数据包中含有CAP_EXTENDED_SECURITY，但没有FLAGS2_EXTENDED_SECURITY。服务端会将其当作NT Security请求（WordCount为12）来处理。到服务端从数据包中提取parameters和data时，导致从错误位置读取bytecount(用户可以操控bytecount),而bytecount是用来计算存储NativeOS和NativeLanMan unicode string (UTF16)缓冲区大小的。</p>
+<p>首先永恒之蓝利用bug9发送SMB_COM_SESSION_SETUP_ANDX请求（WordCount为12）且含有CAP_EXTENDED_SECURITY，但没有FLAGS2_EXTENDED_SECURITY。来实现堆喷射技术构造写有shellcode和nop的堆空间<br>由于只有SMB_COM_NT_TRANS请求的TotalDataCount为4个字节（最大FFFFFFFF），SMB_COM_TRANSACTION2请求的TotalDataCount都为2个字节(最大FFFF)。为保证bug7中传递的transaction数据大于0xFFFF先利用bug6，发送SMB_COM_NT_TRANS设置4字节的TotalDataCount，之后发送SMB_COM_TRANSACTION2_SECONDARY请求，使服务端触发bug7，而由于bug7中缓冲区溢出，结构体指针被覆盖为指向高位地址的恶意构造的堆空间。最后客户端使用SMB处理函数指针时EIP被非法篡改指向SHELLCODE,实现远程代码执行。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://yoursite.com/2019/04/08/CVE漏洞分析/ms17-010/" data-id="cju76c7uv0005n8hfweg6mx5q" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/07/DDOS/DDOS平台搭建/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">DDOS平台搭建</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Categories</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/CVE漏洞分析/">CVE漏洞分析</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/DDOS/">DDOS</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/ELK平台搭建/">ELK平台搭建</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/">《漏洞战争》学习笔记</a><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第一章-栈溢出/">第一章-栈溢出</a></li><li class="category-list-item"><a class="category-list-link" href="/categories/《漏洞战争》学习笔记/第二章-堆溢出/">第二章-堆溢出</a></li></ul></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+
+  
+    
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Archives</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2019/04/">April 2019</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/09/">September 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/06/">June 2018</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2018/05/">May 2018</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">Recent Posts</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/CVE-2018-9509/">Easy File Sharing Web Server 7.2 - Stack Buffer Overflow(CVE-2018-9509)</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/08/CVE漏洞分析/ms17-010/">ms17-010漏洞分析</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/DDOS/DDOS平台搭建/">DDOS平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2019/04/07/ELK平台搭建/ELK平台搭建/">ELK平台搭建</a>
+          </li>
+        
+          <li>
+            <a href="/2018/09/19/漏洞战争/堆溢出/2/">cve-2012-0003 Microsoft Windows Media Player winmm.dll MIDI文件堆溢出漏洞</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2019 John Doe<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+    <a href="/categories" class="mobile-nav-link">Categories</a>
+  
+    <a href="/about" class="mobile-nav-link">About</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+
+
+  </div>
+</body>
+</html>
