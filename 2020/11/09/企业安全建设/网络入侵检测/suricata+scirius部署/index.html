@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="部署配置PF_RING123456789101112#安装pf_ringapt-get install subversion flex bison -yapt-get install dkms libpcre3-dev libyaml-dev libjansson-dev libcap-dev libpcap-dev rustc cargo wireshark -yapt-get install">
+<meta property="og:type" content="article">
+<meta property="og:title" content="网络入侵检测suricata+scirius搭建.md">
+<meta property="og:url" content="http://yoursite.com/2020/11/09/企业安全建设/网络入侵检测/suricata+scirius部署/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="部署配置PF_RING123456789101112#安装pf_ringapt-get install subversion flex bison -yapt-get install dkms libpcre3-dev libyaml-dev libjansson-dev libcap-dev libpcap-dev rustc cargo wireshark -yapt-get install">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-02-13T09:44:35.140Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="网络入侵检测suricata+scirius搭建.md">
+<meta name="twitter:description" content="部署配置PF_RING123456789101112#安装pf_ringapt-get install subversion flex bison -yapt-get install dkms libpcre3-dev libyaml-dev libjansson-dev libcap-dev libpcap-dev rustc cargo wireshark -yapt-get install">
+
+<link rel="canonical" href="http://yoursite.com/2020/11/09/企业安全建设/网络入侵检测/suricata+scirius部署/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>网络入侵检测suricata+scirius搭建.md | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/09/企业安全建设/网络入侵检测/suricata+scirius部署/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xxx">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          网络入侵检测suricata+scirius搭建.md
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-09 20:13:11" itemprop="dateCreated datePublished" datetime="2020-11-09T20:13:11+08:00">2020-11-09</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-13 17:44:35" itemprop="dateModified" datetime="2021-02-13T17:44:35+08:00">2021-02-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/企业安全建设/" itemprop="url" rel="index"><span itemprop="name">企业安全建设</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/企业安全建设/网络入侵检测/" itemprop="url" rel="index"><span itemprop="name">网络入侵检测</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="部署"><a href="#部署" class="headerlink" title="部署"></a>部署</h1><h2 id="配置PF-RING"><a href="#配置PF-RING" class="headerlink" title="配置PF_RING"></a>配置PF_RING</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">#安装pf_ring</span></span><br><span class="line">apt-get install subversion flex bison -y</span><br><span class="line">apt-get install dkms libpcre3-dev libyaml-dev libjansson-dev libcap-dev libpcap-dev rustc cargo wireshark -y</span><br><span class="line">apt-get install build-essential bison flex linux-headers-$(uname -r) git-core automake autoconf libtool subversion -y</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/ntop/PF_RING.git</span><br><span class="line"><span class="built_in">cd</span> PF_RING / kernel</span><br><span class="line">make</span><br><span class="line">sudo insmod ./pf_ring.ko</span><br><span class="line"><span class="built_in">cd</span> ../userland</span><br><span class="line">make</span><br><span class="line">modprobe pf_ring  transparent_mode=1 enable_tx_capture=0 min_num_slots=65534 quick_mode=1</span><br><span class="line">modinfo pf_ring</span><br></pre></td></tr></table></figure>
+<h2 id="安装suricata"><a href="#安装suricata" class="headerlink" title="安装suricata"></a>安装suricata</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">wget https://www.openinfosecfoundation.org/download/suricata-6.0.1.tar.gz</span><br><span class="line"><span class="built_in">cd</span> suricata-6.0.1</span><br><span class="line">./configure --<span class="built_in">enable</span>-pfring --sysconfdir=/etc --localstatedir=/var</span><br></pre></td></tr></table></figure>
+<h2 id="安装scirius"><a href="#安装scirius" class="headerlink" title="安装scirius"></a>安装scirius</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line">apt install python python-dev</span><br><span class="line">curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py</span><br><span class="line">git <span class="built_in">clone</span> https://github.com/StamusNetworks/scirius.git</span><br><span class="line"><span class="built_in">cd</span> scirius</span><br><span class="line">pip3 install -r requirements.txt</span><br><span class="line">pip3 install pyinotify</span><br><span class="line">pip3 install gitpython</span><br><span class="line">pip3 install gitdb</span><br><span class="line"> </span><br><span class="line">sudo apt-get install npm</span><br><span class="line">sudo npm install -g npm@latest webpack@3.11</span><br><span class="line">sudo npm install --unsafe-perm -g node-sass</span><br><span class="line">sudo npm cache clean -f</span><br><span class="line">sudo npm install -g n</span><br><span class="line">sudo n stable</span><br><span class="line"><span class="built_in">cd</span> hunt</span><br><span class="line">npm install</span><br><span class="line">npm run build</span><br><span class="line"> </span><br><span class="line"><span class="built_in">cd</span> ..</span><br><span class="line">python3 manage.py migrate</span><br><span class="line">python3 manage.py createsuperuser</span><br><span class="line">webpack</span><br><span class="line">python3 manage.py collectstatic</span><br><span class="line">python3 manage.py runserver</span><br></pre></td></tr></table></figure>
+<h2 id="配置suricata"><a href="#配置suricata" class="headerlink" title="配置suricata"></a>配置suricata</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">default-rule-path: /var/lib/suricata/rules</span><br><span class="line"> </span><br><span class="line">rule-files:</span><br><span class="line">  - scirius.rules</span><br><span class="line"> </span><br><span class="line">reputation-categories-file: /var/lib/suricata/rules/scirius-categories.txt</span><br><span class="line">default-reputation-path: /var/lib/suricata/rules</span><br><span class="line">reputation-files:</span><br><span class="line"> - scirius-iprep.list</span><br></pre></td></tr></table></figure>
+<h2 id="使用scirius运维"><a href="#使用scirius运维" class="headerlink" title="使用scirius运维"></a>使用scirius运维</h2><figure class="highlight plain"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">#访问web前端</span><br><span class="line">Sources -&gt; add public source</span><br><span class="line">#enable需要加载的rule</span><br><span class="line">Sources -&gt; add public source </span><br><span class="line">rulesets -&gt; add</span><br><span class="line">#新增规则集</span><br><span class="line">suricata -&gt; Ruleset actions -&gt; update+build+push</span><br><span class="line">#suricata规则更新并restart</span><br></pre></td></tr></table></figure>
+<h2 id="scirius源码分析"><a href="#scirius源码分析" class="headerlink" title="scirius源码分析"></a>scirius源码分析</h2><p><a href="/2020/11/11/企业安全建设/网络入侵检测/scirius源码分析">scirius源码分析</a></p>
+<h2 id="部署ELK"><a href="#部署ELK" class="headerlink" title="部署ELK"></a>部署ELK</h2><figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">git <span class="built_in">clone</span> https://github.com/deviantony/docker-elk</span><br><span class="line"><span class="built_in">cd</span> docker-elk</span><br><span class="line">docker-compose up</span><br></pre></td></tr></table></figure>
+<p>ps:如果es加了授权认证，则scirius无法成功连上es，需要把es的x-pack关闭</p>
+<h2 id="参考"><a href="#参考" class="headerlink" title="参考"></a>参考</h2><p><a href="https://suricata.readthedocs.io/en/latest/install.html" target="_blank" rel="noopener">https://suricata.readthedocs.io/en/latest/install.html</a><br><a href="https://xz.aliyun.com/t/7263" target="_blank" rel="noopener">https://xz.aliyun.com/t/7263</a><br><a href="https://paper.seebug.org/1054/" target="_blank" rel="noopener">https://paper.seebug.org/1054/</a><br><a href="https://github.com/orright/scirius/tree/master/doc" target="_blank" rel="noopener">https://github.com/orright/scirius/tree/master/doc</a><br><a href="https://suricata.readthedocs.io/en/latest/quickstart.html" target="_blank" rel="noopener">https://suricata.readthedocs.io/en/latest/quickstart.html</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/06/17/CTF/how2heap/my_wp3/" rel="prev" title="how2heap3">
+      <i class="fa fa-chevron-left"></i> how2heap3
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/11/11/企业安全建设/网络入侵检测/scirius源码分析/" rel="next" title="scirius源码分析">
+      scirius源码分析 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#部署"><span class="nav-number">1.</span> <span class="nav-text">部署</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#配置PF-RING"><span class="nav-number">1.1.</span> <span class="nav-text">配置PF_RING</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装suricata"><span class="nav-number">1.2.</span> <span class="nav-text">安装suricata</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#安装scirius"><span class="nav-number">1.3.</span> <span class="nav-text">安装scirius</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#配置suricata"><span class="nav-number">1.4.</span> <span class="nav-text">配置suricata</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#使用scirius运维"><span class="nav-number">1.5.</span> <span class="nav-text">使用scirius运维</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#scirius源码分析"><span class="nav-number">1.6.</span> <span class="nav-text">scirius源码分析</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#部署ELK"><span class="nav-number">1.7.</span> <span class="nav-text">部署ELK</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#参考"><span class="nav-number">1.8.</span> <span class="nav-text">参考</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xxx</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xxx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

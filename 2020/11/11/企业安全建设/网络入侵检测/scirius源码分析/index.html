@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="scirius先分析主目录的views.py定义了重定向到kinaba、evebox、moloch的路由，没什么关键函数。我们主要关心的是hunt和manage。 rules看一下rules目录下的views.py访问manage页面，主要实现了两个功能  suricata状态监控，配置 rule管理我们看一下是如何实现的？抓包发现前端会不断请求以下路径   用来获取suricata状态的info">
+<meta property="og:type" content="article">
+<meta property="og:title" content="scirius源码分析">
+<meta property="og:url" content="http://yoursite.com/2020/11/11/企业安全建设/网络入侵检测/scirius源码分析/index.html">
+<meta property="og:site_name" content="Hexo">
+<meta property="og:description" content="scirius先分析主目录的views.py定义了重定向到kinaba、evebox、moloch的路由，没什么关键函数。我们主要关心的是hunt和manage。 rules看一下rules目录下的views.py访问manage页面，主要实现了两个功能  suricata状态监控，配置 rule管理我们看一下是如何实现的？抓包发现前端会不断请求以下路径   用来获取suricata状态的info">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-07_15-58.png">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-08_17-09.png">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-08_17-10.png">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-08_17-11.png">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-08_17-15.png">
+<meta property="og:image" content="http://yoursite.com/image/2021-02-08_17-17.png">
+<meta property="og:updated_time" content="2021-02-13T10:01:35.284Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="scirius源码分析">
+<meta name="twitter:description" content="scirius先分析主目录的views.py定义了重定向到kinaba、evebox、moloch的路由，没什么关键函数。我们主要关心的是hunt和manage。 rules看一下rules目录下的views.py访问manage页面，主要实现了两个功能  suricata状态监控，配置 rule管理我们看一下是如何实现的？抓包发现前端会不断请求以下路径   用来获取suricata状态的info">
+<meta name="twitter:image" content="http://yoursite.com/image/2021-02-07_15-58.png">
+
+<link rel="canonical" href="http://yoursite.com/2020/11/11/企业安全建设/网络入侵检测/scirius源码分析/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>scirius源码分析 | Hexo</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Hexo</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/11/11/企业安全建设/网络入侵检测/scirius源码分析/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xxx">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Hexo">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          scirius源码分析
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-11-11 10:51:00" itemprop="dateCreated datePublished" datetime="2020-11-11T10:51:00+08:00">2020-11-11</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-13 18:01:35" itemprop="dateModified" datetime="2021-02-13T18:01:35+08:00">2021-02-13</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/企业安全建设/" itemprop="url" rel="index"><span itemprop="name">企业安全建设</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/企业安全建设/网络入侵检测/" itemprop="url" rel="index"><span itemprop="name">网络入侵检测</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="scirius"><a href="#scirius" class="headerlink" title="scirius"></a>scirius</h1><h2 id="先分析主目录的views-py"><a href="#先分析主目录的views-py" class="headerlink" title="先分析主目录的views.py"></a>先分析主目录的views.py</h2><p>定义了重定向到kinaba、evebox、moloch的路由，没什么关键函数。我们主要关心的是hunt和manage。</p>
+<h1 id="rules"><a href="#rules" class="headerlink" title="rules"></a>rules</h1><h2 id="看一下rules目录下的views-py"><a href="#看一下rules目录下的views-py" class="headerlink" title="看一下rules目录下的views.py"></a>看一下rules目录下的views.py</h2><p>访问manage页面，主要实现了两个功能</p>
+<ul>
+<li>suricata状态监控，配置</li>
+<li>rule管理<br>我们看一下是如何实现的？<br>抓包发现前端会不断请求以下路径</li>
+</ul>
+<p><img src="/image/2021-02-07_15-58.png" alt="status_update"></p>
+<h3 id="用来获取suricata状态的info路径对应函数如下"><a href="#用来获取suricata状态的info路径对应函数如下" class="headerlink" title="用来获取suricata状态的info路径对应函数如下"></a>用来获取suricata状态的info路径对应函数如下</h3><p>rules/views.py<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">PROBE = __import__(settings.RULESET_MIDDLEWARE)</span><br><span class="line"><span class="function"><span class="keyword">def</span> <span class="title">info</span><span class="params">(request)</span>:</span></span><br><span class="line">    data = &#123;<span class="string">'status'</span>: <span class="string">'green'</span>&#125;</span><br><span class="line">    <span class="keyword">if</span> request.GET.__contains__(<span class="string">'query'</span>):</span><br><span class="line">        info = PROBE.common.Info()</span><br><span class="line">        query = request.GET.get(<span class="string">'query'</span>, <span class="string">'status'</span>)</span><br><span class="line">        <span class="keyword">if</span> query == <span class="string">'status'</span>:</span><br><span class="line">            data = &#123;<span class="string">'running'</span>: info.status()&#125;</span><br><span class="line">        <span class="keyword">elif</span> query == <span class="string">'disk'</span>:</span><br><span class="line">            data = info.disk()</span><br><span class="line">        <span class="keyword">elif</span> query == <span class="string">'memory'</span>:</span><br><span class="line">            data = info.memory()</span><br><span class="line">        <span class="keyword">elif</span> query == <span class="string">'used_memory'</span>:</span><br><span class="line">            data = info.used_memory()</span><br><span class="line">        <span class="keyword">elif</span> query == <span class="string">'cpu'</span>:</span><br><span class="line">            data = info.cpu()</span><br><span class="line">    <span class="keyword">return</span> JsonResponse(data, safe=<span class="literal">False</span>)</span><br></pre></td></tr></table></figure></p>
+<h3 id="分析一下该函数功能是怎么实现的？"><a href="#分析一下该函数功能是怎么实现的？" class="headerlink" title="分析一下该函数功能是怎么实现的？"></a>分析一下该函数功能是怎么实现的？</h3><p>在settings.py里可以看到RULESET_MIDDLEWARE=’suricata’,所以PROBE相当于<strong>import</strong>(settings.suricata)，动态加载了suricata。而suricata/common.py如下<br><figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> psutil</span><br><span class="line"><span class="keyword">from</span> rest_framework <span class="keyword">import</span> serializers</span><br><span class="line"></span><br><span class="line"><span class="keyword">from</span> django.conf <span class="keyword">import</span> settings</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> settings.SURICATA_UNIX_SOCKET:</span><br><span class="line">    <span class="keyword">try</span>:</span><br><span class="line">        <span class="keyword">import</span> suricatasc</span><br><span class="line">    <span class="keyword">except</span>:</span><br><span class="line">        settings.SURICATA_UNIX_SOCKET = <span class="literal">None</span></span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">class</span> <span class="title">Info</span><span class="params">()</span>:</span></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">status</span><span class="params">(self)</span>:</span></span><br><span class="line">        suri_running = <span class="string">'danger'</span></span><br><span class="line">        <span class="keyword">if</span> settings.SURICATA_UNIX_SOCKET:</span><br><span class="line">            sc = suricatasc.SuricataSC(settings.SURICATA_UNIX_SOCKET)</span><br><span class="line">            <span class="keyword">try</span>:</span><br><span class="line">                sc.connect()</span><br><span class="line">            <span class="keyword">except</span>:</span><br><span class="line">                <span class="keyword">return</span> <span class="string">'danger'</span></span><br><span class="line">            res = sc.send_command(<span class="string">'uptime'</span>, <span class="literal">None</span>)</span><br><span class="line">            <span class="keyword">if</span> res[<span class="string">'return'</span>] == <span class="string">'OK'</span>:</span><br><span class="line">                suri_running = <span class="string">'success'</span></span><br><span class="line">            sc.close()</span><br><span class="line">        <span class="keyword">else</span>:</span><br><span class="line">            <span class="keyword">for</span> proc <span class="keyword">in</span> psutil.process_iter():</span><br><span class="line">                <span class="keyword">try</span>:</span><br><span class="line">                    pinfo = proc.as_dict(attrs=[<span class="string">'name'</span>])</span><br><span class="line">                <span class="keyword">except</span> psutil.NoSuchProcess:</span><br><span class="line">                    <span class="keyword">pass</span></span><br><span class="line">                <span class="keyword">else</span>:</span><br><span class="line">                    <span class="keyword">if</span> pinfo[<span class="string">'name'</span>] == <span class="string">'Suricata-Main'</span>:</span><br><span class="line">                        suri_running = <span class="string">'success'</span></span><br><span class="line">                        <span class="keyword">break</span></span><br><span class="line">        <span class="keyword">return</span> suri_running</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">disk</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> psutil.disk_usage(<span class="string">'/'</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">memory</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> psutil.virtual_memory()</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">used_memory</span><span class="params">(self)</span>:</span></span><br><span class="line">        mem = psutil.virtual_memory()</span><br><span class="line">        <span class="keyword">return</span> round(mem.used * <span class="number">100.</span> / mem.total, <span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="keyword">def</span> <span class="title">cpu</span><span class="params">(self)</span>:</span></span><br><span class="line">        <span class="keyword">return</span> psutil.cpu_percent(interval=<span class="number">0.2</span>)</span><br></pre></td></tr></table></figure></p>
+<p>可以看到该函数调用psutil获取cpu/disk/mem状态,而判断suricata是否运行则有两种方式</p>
+<ul>
+<li><p>如果配置了suricata_unix_socket则调用suricatasc并发送uptime来判断。</p>
+<blockquote>
+<p><a href="https://suricata.readthedocs.io/en/suricata-5.0.0/unix-socket.html" target="_blank" rel="noopener">suricatasc</a>可以实时和suricata进程进行交互</p>
+</blockquote>
+</li>
+<li>如果没有配置SURICATA_UNIX_SOCKET则调用psutil.process_iter()来判断是否存在Suricata-Main来实现</li>
+</ul>
+<h3 id="接下来看一下核心功能之一-规则的管理，先大概了解一下功能"><a href="#接下来看一下核心功能之一-规则的管理，先大概了解一下功能" class="headerlink" title="接下来看一下核心功能之一-规则的管理，先大概了解一下功能"></a>接下来看一下核心功能之一-规则的管理，先大概了解一下功能</h3><ul>
+<li>/rules/source可以看到规则源</li>
+<li>/rules/source/add_public可以增加公共规则源</li>
+<li>/rules/source/add可以编辑自定义规则源</li>
+<li>/rules/ruleset/add可以新增规则集</li>
+<li>/rules/ruleset/n/update可以更新规则集</li>
+<li>/rules/ruleset/n/copy可以复制规则集</li>
+<li>/rules/ruleset/n/delete可以删除规则集</li>
+<li>/rules/ruleset/n/edit可以编辑规则集</li>
+<li>/rules/ruleset/1/edit?mode=sources可以启用/禁用source</li>
+<li>/rules/ruleset/1/edit?mode=categories可以启用/禁用categories</li>
+<li>/rules/ruleset/1/addsupprule可以禁用某条rule</li>
+<li>/rules/ruleset/1/edit?mode=rules可以恢复某条被禁用的rule</li>
+<li>/rules/category/n/可以查看category</li>
+<li>/rules/category/n/enable可以启用category</li>
+<li>/rules/category/n/disable可以禁用category</li>
+<li>/rules/category/n/transform </li>
+<li>/rules/rule/pk/n/可以查看rule的定义</li>
+<li>/rules/rule/pk/n/disable可以禁用rule</li>
+<li>/rules/rule/pk/n/enable可以启用rule</li>
+<li>/rules/rule/n/edit</li>
+<li>/rules/rule/n/disable</li>
+<li>/rules/rule/n/enable</li>
+<li>/rules/rule/n/threshold?action=threshold为规则增加触发的阀值</li>
+<li>/rules/rule/n/threshold?action=suppress过滤某ip触发改规则<h4 id="页面如下"><a href="#页面如下" class="headerlink" title="页面如下"></a>页面如下</h4><img src="/image/2021-02-08_17-09.png" alt="source_manage"><br><img src="/image/2021-02-08_17-10.png" alt="ruleset_action"><br><img src="/image/2021-02-08_17-11.png" alt="edit_ruleset"><br><img src="/image/2021-02-08_17-15.png" alt="edit_categories"><br><img src="/image/2021-02-08_17-17.png" alt="edit_rule"><h4 id="rule主页面代码如下"><a href="#rule主页面代码如下" class="headerlink" title="rule主页面代码如下"></a>rule主页面代码如下</h4><pre><code class="python"><span class="comment"># Create your views here.</span>
+<span class="function"><span class="keyword">def</span> <span class="title">index</span><span class="params">(request)</span>:</span>
+  ruleset_list = Ruleset.objects.all().order_by(<span class="string">'-created_date'</span>)[:<span class="number">5</span>]
+  source_list = Source.objects.all().order_by(<span class="string">'-created_date'</span>)[:<span class="number">5</span>]
+  context = {<span class="string">'ruleset_list'</span>: ruleset_list,
+             <span class="string">'source_list'</span>: source_list}
+  <span class="keyword">try</span>:
+      context[<span class="string">'probes'</span>] = [<span class="string">'"'</span> + x + <span class="string">'"'</span> <span class="keyword">for</span> x <span class="keyword">in</span> PROBE.models.get_probe_hostnames()]
+  <span class="keyword">except</span>:
+      <span class="keyword">pass</span>
+  <span class="keyword">return</span> scirius_render(request, <span class="string">'rules/index.html'</span>, context)
+</code></pre>
+</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/11/09/企业安全建设/网络入侵检测/suricata+scirius部署/" rel="prev" title="网络入侵检测suricata+scirius搭建.md">
+      <i class="fa fa-chevron-left"></i> 网络入侵检测suricata+scirius搭建.md
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#scirius"><span class="nav-number">1.</span> <span class="nav-text">scirius</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#先分析主目录的views-py"><span class="nav-number">1.1.</span> <span class="nav-text">先分析主目录的views.py</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#rules"><span class="nav-number">2.</span> <span class="nav-text">rules</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#看一下rules目录下的views-py"><span class="nav-number">2.1.</span> <span class="nav-text">看一下rules目录下的views.py</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#用来获取suricata状态的info路径对应函数如下"><span class="nav-number">2.1.1.</span> <span class="nav-text">用来获取suricata状态的info路径对应函数如下</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#分析一下该函数功能是怎么实现的？"><span class="nav-number">2.1.2.</span> <span class="nav-text">分析一下该函数功能是怎么实现的？</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#接下来看一下核心功能之一-规则的管理，先大概了解一下功能"><span class="nav-number">2.1.3.</span> <span class="nav-text">接下来看一下核心功能之一-规则的管理，先大概了解一下功能</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#页面如下"><span class="nav-number">2.1.3.1.</span> <span class="nav-text">页面如下</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#rule主页面代码如下"><span class="nav-number">2.1.3.2.</span> <span class="nav-text">rule主页面代码如下</span></a></li></ol></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xxx</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">30</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">17</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xxx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
