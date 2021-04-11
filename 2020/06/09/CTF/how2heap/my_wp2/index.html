@@ -24,7 +24,7 @@
 <meta property="og:type" content="article">
 <meta property="og:title" content="how2heap2">
 <meta property="og:url" content="http://yoursite.com/2020/06/09/CTF/how2heap/my_wp2/index.html">
-<meta property="og:site_name" content="Hexo">
+<meta property="og:site_name" content="My blog">
 <meta property="og:description" content="Poison_Null_Byte利用原理申请chunk a,b,c 然后free b,然后利用某个漏洞null_byte溢出覆盖b的chunk size（0x210-&amp;gt;0x200），此时再次malloc b1，b2，会修改chunk c的prev_inuse size，但是因为b的chunk size被缩小，导致没有正确修改到chunk c的prev_inuse size。所以chunk c">
 <meta property="og:locale" content="zh-CN">
 <meta property="og:updated_time" content="2021-02-13T08:39:43.759Z">
@@ -45,7 +45,7 @@
   };
 </script>
 
-  <title>how2heap2 | Hexo</title>
+  <title>how2heap2 | My blog</title>
   
 
 
@@ -96,7 +96,7 @@
 
     <a href="/" class="brand" rel="start">
       <span class="logo-line-before"><i></i></span>
-      <h1 class="site-title">Hexo</h1>
+      <h1 class="site-title">My blog</h1>
       <span class="logo-line-after"><i></i></span>
     </a>
   </div>
@@ -164,7 +164,7 @@
     </span>
 
     <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
-      <meta itemprop="name" content="Hexo">
+      <meta itemprop="name" content="My blog">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
@@ -305,8 +305,8 @@
         
     <div class="post-nav">
       <div class="post-nav-item">
-    <a href="/2020/06/07/CTF/how2heap/my_wp/" rel="prev" title="how2heap1">
-      <i class="fa fa-chevron-left"></i> how2heap1
+    <a href="/2020/06/08/CVE漏洞分析/CVE-2018-8581 todo/" rel="prev" title="CVE-2018-8581">
+      <i class="fa fa-chevron-left"></i> CVE-2018-8581
     </a></div>
       <div class="post-nav-item">
     <a href="/2020/06/17/CTF/how2heap/my_wp3/" rel="next" title="how2heap3">
@@ -384,7 +384,7 @@
       <div class="site-state-item site-state-posts">
           <a href="/archives/">
         
-          <span class="site-state-item-count">29</span>
+          <span class="site-state-item-count">42</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>

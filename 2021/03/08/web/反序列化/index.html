@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.8.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"yoursite.com","root":"/","scheme":"Muse","version":"7.8.0","exturl":false,"sidebar":{"position":"left","display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="todo">
+<meta property="og:type" content="article">
+<meta property="og:title" content="反序列化">
+<meta property="og:url" content="http://yoursite.com/2021/03/08/web/反序列化/index.html">
+<meta property="og:site_name" content="My blog">
+<meta property="og:description" content="todo">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-03-20T13:28:30.016Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="反序列化">
+<meta name="twitter:description" content="todo">
+
+<link rel="canonical" href="http://yoursite.com/2021/03/08/web/反序列化/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'zh-CN'
+  };
+</script>
+
+  <title>反序列化 | My blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">My blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>首页</a>
+
+  </li>
+        <li class="menu-item menu-item-categories">
+
+    <a href="/categories/" rel="section"><i class="fa fa-th fa-fw"></i>分类</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="http://yoursite.com/2021/03/08/web/反序列化/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="xxx">
+      <meta itemprop="description" content>
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="My blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          反序列化
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2021-03-08 18:25:18" itemprop="dateCreated datePublished" datetime="2021-03-08T18:25:18+08:00">2021-03-08</time>
+            </span>
+              <span class="post-meta-item">
+                <span class="post-meta-item-icon">
+                  <i class="far fa-calendar-check"></i>
+                </span>
+                <span class="post-meta-item-text">更新于</span>
+                <time title="修改时间：2021-03-20 21:28:30" itemprop="dateModified" datetime="2021-03-20T21:28:30+08:00">2021-03-20</time>
+              </span>
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-folder"></i>
+              </span>
+              <span class="post-meta-item-text">分类于</span>
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/web/" itemprop="url" rel="index"><span itemprop="name">web</span></a>
+                </span>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <div class="hbe hbe-container" id="hexo-blog-encrypt" data-wpm="Oh, this is an invalid password. Check and try again, please." data-whm="OOPS, these decrypted content may changed, but you can still have a look.">
+  <script id="hbeData" type="hbeData" data-hmacdigest="561cfeabff8931e11edc798e85ce082dd0d8016236bc6e6e5f69c7b7e0df7563">9bacbac138c61e82d505ecf19e6feb7d43c8b0f0a075cde3698539f5701e4d6af0360d76bd11d9fa46db7393102c56eb40614f9f6b16f5e03be34a2c07217faa7968c67bf9f4b53d43b43af79e9af132d05b3a24f21330df9329b8d97563a9bda645eb7ffa6a684dbdbfd9dd4379daecaa94789911c6a2e30d8df885239efe33a9e5ca60ba1a562f6afcb079ffe5c047ebc19e481b7de1ebecbadc1c3cadbf62bc0326de3f23666d90ddcde7eba71a21937626569d87f421735f3aa5c9ee5e439ac439f4de9240f9e1db27f2d6101e012015350f3e801158f67ba539d9319d26c41df08e821b85d1c62adfa0b79b5ed5cc598f0829c8eef173c4a60fd5eff44740b0ea168067049dc2cbfd587e345447cf466715fa8fde7cd96d0cfe2dda2aaad165e83f63c0898408683ea64f9607d5bf443b3659ecbc1828cd10b2b3b95b9cccd731bf15350c4bd5f0d5d2a2afc6ad9c7e413e6db229fc8ca199e14fd6bd46ea92138fa0f06919124793746c86ae4fca734c104035b5f20abef4bdcb6aaddf0688c59103f8dca67103bbef8f76e313ee7554627ffb163fdb7e8bc6bc5bc2b1b377a713d66b34260775c6f4edc9c2b5576121d8bd7ab3788b5f8faddc75ecaea5c000e63fca7a4e4d7c3da76df0c254180347eda5764b642e076c62811c8b7aa5e37315f534acaff7e91bddbc3d254317be247e5d65a49358eee32fef96fa817c7fa6958550c54825912d73f960901d004395fe64966d8a8a338714edc8355379e164f65fad72e520551f8744528d836655f911de30e4acc23783a049e1519b6c06a392d3fbc58ee6bbcad6b13890f2b772c1c40048cd01dc1b8394b5aee02704aa55050eb62ebb25ba60cfa95ad454a15d45648a57d2d61a57f9e466844198abaaaa06600e1daaa22a7142365628cd6ed7ef468f00da02253ee09111da74957500444e4cd076f2ae96850267b38706ac0000153538c7fabfe7796ed4b9281a3684c982fa07db4f519b08ca0b836e8546d67cdd9a8a93b698cde5b25646a67b98b344e3291fbc5ee4936b9048622551f8c9126a547a3d7a21a77182183412f0528b1906cfafbdcb0897fd7623d128ed7996d0cbaa453854f250906ba7db72c7a2b586d3e47c5884881683f6cca1faca15fd89b5db3de5cd56e758b5ae6e6bf2f21f011b78aa4f2805a2ecf06342a9462b3557275b73dc18eec6457bd1a8c18740273d44708620e2fd1816b6abec01c1b817608edcd1fc1741e7594661482f223234ba5e71844a1da873c34e5d573e7b5413e99ca7e0f59449a2bf97d6a91c4afa9d65b96788afc569bd9348da7215d75a4de3cc5c561c718936eaeb5dfa5d51ed4e58a5faa04a119731fea297ac777ccbcb130b95801229a59173aaf085fda4360fa497167283f6789460836072e302b0657363729545d46c2ae83471e2f85bcb6d584c97ebaf37a1186c744408e1bd9e207c7eb960344fcb37184141b02166ec58b8b5b3dda55eba96e5cd08a808ed985eeff7ea31399ad7ada6756957df7a1e4b7bf5d478ee5a5f40dd8510cb7abde7094029ef46cecd74074771ec0f64e3826d8ccf1372d2d55177c4159432844b7fab6e6be50653df40c86200bd9facad70684c03677a07a18fa2edb62d2bb9c0209adfd1086cde01ef85b0c0a54b5863487da086284dc2717d1e93da21ec425c160968798b77639c99359bb2effc1184f5326834c243aed8b4943979823287124fd47d58c7f9a3bf8777e0d54cda6b043e1206dcb264c5043ff75687d44a0e0df805459c51032778571a1ec0f4f9b5e6232d52ac8f91a636f67037337df9c3dfed0c980290d55bdc8c34cec4b6f1432405fd84ef5e19d32ea62bbf46de541f75f1f9685495da1e6601b3d4dd7519bf5989285bd1fb75b355830259c88d70217be337bf7761d49fe0aa710bace68ea57fb3cac9a80c3bb70f54230c67735a13266cce6eddd36907fd19701cf4bc71893ef41f966a0bf6cacf6a6a71ef422b0f55876ea66ce7d14f9d0f3c1928c1dfcd94b789b92cfe49ce2c864209436705c1df889d0d53d86fd47ea524847dfea28ea08074de85984faededb336977406641dd09d323b03afe13f77b6a7f5404780f1bc358b44ac932c8f845f9e1f963d2b656cd1586859720f28bbf72bcdea1b8eec9cb78bccd3183be4a9c54460bea87fa074ae862ff12d70a1389a821225b4795d53db2379167b5906bcb6a19d3d2a36c28116b7c6d0be0ec5b237ab3e29f7279a5c4b58b71636bef5d8dadf35959640e7af537c78018d85b56fdcfaf12b0bb52560bc15cfb5832fb00fba5ef75d363960c48a70c550db28bccfa0a9de17b01d51dfc84a3b528584dc12483dd32f3d9b7cd475f1ce9a9b93e38adfc46121b53ac159ae44dcef38630e9c3238a28d23e5cd65c696c579ff5c89f7c78f386468f643d215c51a2091d9e6568beb963bb2beb307b7a3c391a44cc1ece79e7eec85bfe7bf6eb54714a7b74265da9470bf8b5fcd16afd07ce203c507fa244c613fe2325a8156d2eca71a399b6406b5b428a54220c63c6cfd8c92de257c29bb0b80b28771e59e8214d695ff6532fa045436bd3e00b2ec56850bc037b3d0eaaf6ce2f615e411eb540ec405e82d66529f3fbba22c092a7c59ad99e75f0d83245566297493af16b8770eec0ad27c007ee834126df7aa05e851dd8da91f2dc6e8e13d73761b89ac60db6536cba83074158cf14e2db6a74eb4e380004b1ed637282a0855520da8c26b20a3ad4f9394d0e37f8a91e99c5bce3247c16ddaf2feebfa3af831d606e4c33fd9aa2964f9d323cf8d38dc931e65a9a6c265935d0c02e05a3e13c8f50b760241a3350f35294021f76d2d962bb4acc668f9cb0099131ff2c5bd72b5b93bd5c250852751ff77fdfa4d4574e12ca94e5</script>
+  <div class="hbe hbe-content">
+    <div class="hbe hbe-input hbe-input-default">
+      <input class="hbe hbe-input-field hbe-input-field-default" type="password" id="hbePass">
+      <label class="hbe hbe-input-label hbe-input-label-default" for="hbePass">
+        <span class="hbe hbe-input-label-content hbe-input-label-content-default">输入密码，查看文章</span>
+      </label>
+    </div>
+  </div>
+</div>
+<script data-pjax src="/lib/hbe.js"></script><link href="/css/hbe.style.css" rel="stylesheet" type="text/css">
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/2021/03/08/CVE漏洞分析/CVE-2021-26855 todo/" rel="prev" title="CVE-2021-26855">
+      <i class="fa fa-chevron-left"></i> CVE-2021-26855
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/2021/04/11/新建/" rel="next" title="新建">
+      新建 <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">xxx</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">42</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+            <a href="/categories/">
+          
+        <span class="site-state-item-count">16</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+  </nav>
+</div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">xxx</span>
+</div>
+  <div class="powered-by">由 <a href="https://hexo.io" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://muse.theme-next.org" class="theme-link" rel="noopener" target="_blank">NexT.Muse</a> 强力驱动
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
